@@ -3,8 +3,8 @@ faker
 flask
 geopy
 kaleido
+pandas
 plotly
-polars
 pytest
 requests
 sqlmodel
