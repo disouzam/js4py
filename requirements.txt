@@ -1,0 +1,10 @@
+-r lib/mccole/requirements.txt
+faker
+flask
+geopy
+kaleido
+plotly
+polars
+pytest
+requests
+sqlmodel
