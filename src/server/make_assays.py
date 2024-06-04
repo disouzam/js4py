@@ -50,12 +50,12 @@ def make_experiments(params, fake):
 
         started, ended = random_experiment_duration(params, kind)
         experiments.append(
-            (experiment_id, kind, round_date(started), round_date(ended))
+            {'exp_id': experiment_id, 'kind': kind, 'start': round_date(started), 'end': round_date(ended)}
         )
 
         num_staff = random.randint(*EXPERIMENTS[kind]['staff'])
         performed.extend(
-            [(s, experiment_id) for s in random.sample(staff_ids, num_staff)]
+            [{'staff': s, 'exp_id': experiment_id} for s in random.sample(staff_ids, num_staff)]
         )
 
         if ended is not None:
@@ -68,28 +68,31 @@ def make_experiments(params, fake):
     return {
         'experiments': experiments,
         'performed': performed,
-        'plate': plates,
+        'plates': plates,
         'invalidated': invalidated
     }
 
 
 def make_staff(params, fake):
     '''Create people.'''
-    return [(fake.first_name(), fake.last_name()) for _ in range(params.staff)]
+    return [
+        {'staff_id': i, 'personal': fake.first_name(), 'family': fake.last_name()}
+        for i in range(params.staff)
+    ]
 
 
 def invalidate_plates(params, plates):
     '''Invalidate a random set of plates.'''
     selected = [
-        (i, p[1]) for (i, p) in enumerate(plates) if random.random() < params.invalid
+        (i, p['exp_date']) for (i, p) in enumerate(plates) if random.random() < params.invalid
     ]
     return [
-        (
-            plate_id,
-            random.randint(1, params.staff + 1),
-            random_date_interval(upload_date, params.enddate),
-        )
-        for (plate_id, upload_date) in selected
+        {
+            'plate_id': plate_id,
+            'staff_id': random.randint(1, params.staff + 1),
+            'date': random_date_interval(exp_date, params.enddate),
+        }
+        for (plate_id, exp_date) in selected
     ]
 
 
@@ -129,11 +132,11 @@ def random_experiment_duration(params, kind):
 def random_plates(params, kind, experiment_id, start_date, random_filename):
     '''Generate random plate data.'''
     return [
-        (
-            experiment_id,
-            random_date_interval(start_date, params.enddate),
-            next(random_filename),
-        )
+        {
+            'exp_id': experiment_id,
+            'exp_date': random_date_interval(start_date, params.enddate),
+            'filename': next(random_filename),
+        }
         for _ in range(random.randint(*EXPERIMENTS[kind]['plates']))
     ]
 

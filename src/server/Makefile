@@ -2,6 +2,17 @@ include ../../examples.mk
 
 ## all: make all datasets
 all: assay_data.json genome_data.json sample_data.csv
+	make plates
+
+## plates: generate plate files
+plates: make_plates.py assay_data.json
+	rm -rf designs && mkdir designs
+	rm -rf readings && mkdir readings
+	python $< \
+	--assays assay_data.json \
+	--designs designs \
+	--params assay_params.json \
+	--readings readings
 
 ## assays: generate assay files
 assay_data.json: make_assays.py assay_params.json
