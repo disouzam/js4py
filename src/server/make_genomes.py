@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 import random
 
+from params import GenomeParams, load_params
+
 # Bases.
 DNA = 'ACGT'
 
@@ -31,12 +33,12 @@ class GenePool:
 def main():
     '''Main driver.'''
     options = parse_args()
-    random.seed(options.seed)
+    random.seed(options.params.seed)
     genomes = random_genomes(
-        options.length,
-        options.num_genomes,
-        options.num_snp,
-        options.prob_other,
+        options.params.length,
+        options.params.num_genomes,
+        options.params.num_snp,
+        options.params.prob_other,
     )
     add_susceptibility(genomes)
     save(options.outfile, genomes)
@@ -55,24 +57,11 @@ def add_susceptibility(genomes):
 def parse_args():
     '''Get command-line arguments.'''
     parser = argparse.ArgumentParser()
-    parser.add_argument('--length', type=int, required=True, help='genome length')
     parser.add_argument('--outfile', type=str, default=None, help='output file')
-    parser.add_argument(
-        '--num_genomes', type=int, required=True, help='number of genomes'
-    )
-    parser.add_argument('--num_snp', type=int, required=True, help='number of SNPs')
-    parser.add_argument(
-        '--prob_other', type=float, required=True, help='probability of other mutation'
-    )
-    parser.add_argument('--seed', type=int, required=True, help='RNG seed')
-
+    parser.add_argument('--params', type=str, required=True, help='parameter file')
     options = parser.parse_args()
-
-    assert options.length > 0, f'Require --length > 0 not {options.length}'
-    assert options.num_genomes > 0, f'Require --genomes > 0 not {options.num_genomes}'
-    assert options.num_snp >= 0, f'Require --num_snp >= 0 not {options.num_snp}'
-    assert options.prob_other >= 0.0, f'Require --prob_other >= 0.0 not {options.prob_other}'
-
+    assert options.params != options.outfile, 'Cannot use same filename for options and parameters'
+    options.params = load_params(GenomeParams, options.params)
     return options
 
 

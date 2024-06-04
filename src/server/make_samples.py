@@ -10,6 +10,8 @@ import sys
 
 from geopy.distance import lonlat, distance
 
+from params import SampleParams, load_params
+
 
 CIRCLE = 360.0
 LON_LAT_PRECISION = 5
@@ -22,7 +24,7 @@ SNAIL_PRECISION = 1
 def main():
     '''Main driver.'''
     options = parse_args()
-    random.seed(options.seed)
+    random.seed(options.params.seed)
     genomes = json.loads(Path(options.genomes).read_text())
     geo_params = get_geo_params(options)
     samples = generate_samples(options, genomes, geo_params)
@@ -35,9 +37,9 @@ def generate_samples(options, genomes, geo_params):
     for sequence in genomes['individuals']:
         point, scale = random_geo(geo_params)
         if sequence[genomes['susceptible_loc']] == genomes['susceptible_base']:
-            limit = options.mutant
+            limit = options.params.mutant
         else:
-            limit = options.normal
+            limit = options.params.normal
         reading = random.uniform(
             MIN_SNAIL_SIZE, MIN_SNAIL_SIZE + MAX_SNAIL_SIZE * limit * scale
         )
@@ -62,17 +64,14 @@ def parse_args():
     '''Parse command-line arguments.'''
     parser = argparse.ArgumentParser()
     parser.add_argument('--genomes', type=str, required=True, help='genome file')
-    parser.add_argument(
-        '--mutant', type=float, help='scaling factor for mutant genomes'
-    )
-    parser.add_argument(
-        '--normal', type=float, help='scaling factor for normal genomes'
-    )
     parser.add_argument('--outfile', type=str, help='output file')
+    parser.add_argument('--params', type=str, required=True, help='parameter file')
     parser.add_argument('--sites', type=str, required=True, help='sites data file')
-    parser.add_argument('--seed', type=int, required=True, help='RNG seed')
     parser.add_argument('--surveys', type=str, required=True, help='surveys data file')
-    return parser.parse_args()
+    options = parser.parse_args()
+    assert options.params != options.outfile, 'Cannot use same filename for options and parameters'
+    options.params = load_params(SampleParams, options.params)
+    return options
 
 
 def random_geo(geo_params):
