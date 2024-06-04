@@ -1,18 +1,28 @@
 include ../../examples.mk
 
 ## all: make all datasets
-all: assay_data.json genome_data.json sample_data.csv
-	make plates
+all: lab.db
+
+lab.db: make_db.py designs/.touch readings/.touch assay_data.json genome_data.json sample_data.csv
+	python $< \
+	--dbfile $@ \
+	--assays assay_data.json \
+	--samples sample_data.csv \
+	--sites site_params.csv \
+	--surveys survey_params.csv
 
 ## plates: generate plate files
-plates: make_plates.py assay_data.json
-	rm -rf designs && mkdir designs
-	rm -rf readings && mkdir readings
+plates: designs/.touch readings/.touch
+
+designs/.touch readings/.touch: make_plates.py assay_data.json
+	mkdir -p designs readings
+	rm -f designs/*.csv readings/*.csv
 	python $< \
 	--assays assay_data.json \
 	--designs designs \
 	--params assay_params.json \
 	--readings readings
+	touch designs/.touch readings/.touch
 
 ## assays: generate assay files
 assay_data.json: make_assays.py assay_params.json

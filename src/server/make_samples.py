@@ -66,8 +66,8 @@ def parse_args():
     parser.add_argument('--genomes', type=str, required=True, help='genome file')
     parser.add_argument('--outfile', type=str, help='output file')
     parser.add_argument('--params', type=str, required=True, help='parameter file')
-    parser.add_argument('--sites', type=str, required=True, help='sites data file')
-    parser.add_argument('--surveys', type=str, required=True, help='surveys data file')
+    parser.add_argument('--sites', type=str, required=True, help='sites parameter file')
+    parser.add_argument('--surveys', type=str, required=True, help='surveys parameter file')
     options = parser.parse_args()
     assert options.params != options.outfile, 'Cannot use same filename for options and parameters'
     options.params = load_params(SampleParams, options.params)

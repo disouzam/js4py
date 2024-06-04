@@ -55,7 +55,7 @@ def make_experiments(params, fake):
 
         num_staff = random.randint(*EXPERIMENTS[kind]['staff'])
         performed.extend(
-            [{'staff': s, 'exp_id': experiment_id} for s in random.sample(staff_ids, num_staff)]
+            [{'staff_id': s, 'exp_id': experiment_id} for s in random.sample(staff_ids, num_staff)]
         )
 
         if ended is not None:
