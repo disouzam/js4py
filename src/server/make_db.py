@@ -14,7 +14,7 @@ def main():
 
     csv_to_db(con, 'samples', options.samples)
     csv_to_db(con, 'sites', options.sites)
-    csv_to_db(con, 'surveys', options.surveys, 'label', 'site', 'date')
+    csv_to_db(con, 'surveys', options.surveys, 'survey_id', 'site_id', 'date')
 
     assays = json.load(open(options.assays, 'r'))
     json_to_db(con, assays, 'staff')

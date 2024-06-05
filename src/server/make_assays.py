@@ -133,11 +133,12 @@ def random_plates(params, kind, experiment_id, start_date, random_filename):
     '''Generate random plate data.'''
     return [
         {
+            'plate_id': i + 1,
             'exp_id': experiment_id,
             'exp_date': random_date_interval(start_date, params.enddate),
             'filename': next(random_filename),
         }
-        for _ in range(random.randint(*EXPERIMENTS[kind]['plates']))
+        for i in range(random.randint(*EXPERIMENTS[kind]['plates']))
     ]
 
 

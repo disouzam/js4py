@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<table>
+  <thead>
+    <tr><th>What</th><th>How Many</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Sites</td><td>{{ num_sites }}</td></tr>
+    <tr><td>Surveys</td><td>{{ num_surveys }}</td></tr>
+    <tr><td>Samples</td><td>{{ num_samples }}</td></tr>
+    <tr><td>Staff</td><td>{{ num_staff }}</td></tr>
+    <tr><td>Performed</td><td>{{ num_performed }}</td></tr>
+    <tr><td>Plates</td><td>{{ num_plates }}</td></tr>
+    <tr><td>Invalidated</td><td>{{ num_invalidated }}</td></tr>
+  </tbody>
+</table>
+{% endblock %}

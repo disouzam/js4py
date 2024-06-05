@@ -34,7 +34,7 @@ def main():
 def generate_samples(options, genomes, geo_params):
     '''Generate snail samples.'''
     samples = []
-    for sequence in genomes['individuals']:
+    for i, sequence in enumerate(genomes['individuals']):
         point, scale = random_geo(geo_params)
         if sequence[genomes['susceptible_loc']] == genomes['susceptible_base']:
             limit = options.params.mutant
@@ -43,9 +43,9 @@ def generate_samples(options, genomes, geo_params):
         reading = random.uniform(
             MIN_SNAIL_SIZE, MIN_SNAIL_SIZE + MAX_SNAIL_SIZE * limit * scale
         )
-        samples.append((point.longitude, point.latitude, sequence, reading))
+        samples.append((i + 1, point.longitude, point.latitude, sequence, reading))
 
-    df = pd.DataFrame(samples, columns=('lon', 'lat', 'sequence', 'reading'))
+    df = pd.DataFrame(samples, columns=('sample_id', 'lon', 'lat', 'sequence', 'reading'))
     df['lon'] = df['lon'].round(LON_LAT_PRECISION)
     df['lat'] = df['lat'].round(LON_LAT_PRECISION)
     df['reading'] = df['reading'].round(SNAIL_PRECISION)
@@ -57,7 +57,7 @@ def get_geo_params(options):
     '''Get geographic parameters.'''
     sites = pd.read_csv(Path(options.sites))
     surveys = pd.read_csv(Path(options.surveys))
-    return sites.merge(surveys, how='inner', on='site')
+    return sites.merge(surveys, how='inner', on='site_id')
 
 
 def parse_args():

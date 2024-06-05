@@ -1,4 +1,4 @@
-label,site,date,num,peak,relative_sd,radius
+survey_id,site_id,date,num,peak,relative_sd,radius
 1748,COW,2023-04-27,23,100.0,0.1,0.1
 1749,COW,2023-04-28,11,100.0,0.1,0.1
 1755,COW,2023-05-13,15,101.0,0.11,0.1

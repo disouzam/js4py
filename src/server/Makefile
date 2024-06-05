@@ -1,7 +1,11 @@
 include ../../examples.mk
 
-## all: make all datasets
-all: lab.db
+## serve: run server
+serve: lab.db
+	python server.py lab.db
+
+## data: make all datasets
+data: lab.db
 
 lab.db: make_db.py designs/.touch readings/.touch assay_data.json genome_data.json sample_data.csv
 	python $< \
