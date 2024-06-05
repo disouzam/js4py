@@ -1,52 +1,61 @@
 include ../../examples.mk
 
 ## serve: run server
-serve: lab.db
-	python server.py lab.db
+serve: data/lab.db
+	python server.py data/lab.db
 
-## data: make all datasets
-data: lab.db
+## datasets: make all datasets
+datasets: data/lab.db data/designs/.touch data/readings/.touch
 
-lab.db: make_db.py designs/.touch readings/.touch assay_data.json genome_data.json sample_data.csv
+data/lab.db: bin/make_db.py data/assay_data.json data/sample_data.csv data/genome_data.json
+	@mkdir -p data
 	python $< \
 	--dbfile $@ \
-	--assays assay_data.json \
-	--samples sample_data.csv \
-	--sites site_params.csv \
-	--surveys survey_params.csv
+	--assays data/assay_data.json \
+	--samples data/sample_data.csv \
+	--sites params/site_params.csv \
+	--surveys params/survey_params.csv
 
 ## plates: generate plate files
-plates: designs/.touch readings/.touch
+plates: data/designs/.touch data/readings/.touch
 
-designs/.touch readings/.touch: make_plates.py assay_data.json
-	mkdir -p designs readings
-	rm -f designs/*.csv readings/*.csv
+data/designs/.touch data/readings/.touch: bin/make_plates.py data/assay_data.json
+	@mkdir -p data/designs data/readings
+	rm -f data/designs/*.csv data/readings/*.csv
 	python $< \
-	--assays assay_data.json \
-	--designs designs \
-	--params assay_params.json \
-	--readings readings
-	touch designs/.touch readings/.touch
+	--assays data/assay_data.json \
+	--designs data/designs \
+	--params params/assay_params.json \
+	--readings data/readings
+	touch data/designs/.touch data/readings/.touch
 
 ## assays: generate assay files
-assay_data.json: make_assays.py assay_params.json
+data/assay_data.json: bin/make_assays.py params/assay_params.json data/genome_data.json data/sample_data.csv
+	@mkdir -p data
 	python $< \
+	--genomes data/genome_data.json \
 	--outfile $@ \
-	--params assay_params.json
+	--params params/assay_params.json \
+	--samples data/sample_data.csv
 
 ## sample_data.csv: sampled snails from survey sites
-sample_data.csv: make_samples.py genome_data.json sample_params.json site_params.csv survey_params.csv
+data/sample_data.csv: bin/make_samples.py data/genome_data.json params/sample_params.json params/site_params.csv params/survey_params.csv
+	@mkdir -p data
 	python $< \
-	--genomes genome_data.json \
+	--genomes data/genome_data.json \
 	--outfile $@ \
-	--params sample_params.json \
-	--sites site_params.csv \
-	--surveys survey_params.csv
+	--params params/sample_params.json \
+	--sites params/site_params.csv \
+	--surveys params/survey_params.csv
 
 ## genome_data.json: synthesized genomes
-genome_data.json: make_genomes.py genome_params.json
+data/genome_data.json: bin/make_genomes.py params/genome_params.json
+	@mkdir -p data
 	python $< \
 	--outfile $@ \
-	--params genome_params.json
+	--params params/genome_params.json
+
+clean: _clean
+	@rm -rf data designs readings
 
 settings: _settings

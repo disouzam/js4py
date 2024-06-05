@@ -26,9 +26,10 @@ def main():
 
 def create_files(options):
     '''Create randomized plate files.'''
-    for filename, kind in join_assay_data(options):
+    for filename, sample_id, kind in join_assay_data(options):
         make_plate(
             options.params,
+            sample_id,
             kind,
             Path(options.designs, filename),
             Path(options.readings, filename),
@@ -49,15 +50,15 @@ def generate(params, func):
 def join_assay_data(options):
     '''Get experiment type and plate filename from data.'''
     assays = json.load(open(options.assays, 'r'))
-    experiments = {x['exp_id']: x['kind'] for x in assays['experiment']}
-    plates = {p['filename']: p['exp_id'] for p in assays['plate']}
-    return ((filename, experiments[plates[filename]]) for filename in plates)
+    experiments = {x['sample_id']: x['kind'] for x in assays['experiment']}
+    plates = {p['filename']: p['sample_id'] for p in assays['plate']}
+    return ((f, plates[f], experiments[plates[f]]) for f in plates)
 
 
-def make_head(kind):
+def make_head(kind, sample_id):
     '''Make head of plate.'''
     return [
-        [MODEL, kind],
+        [MODEL, kind, sample_id],
         [],
     ]
 
@@ -75,14 +76,14 @@ def make_placement(kind):
     return placement, columns
 
 
-def make_plate(params, kind, design_file, readings_file):
+def make_plate(params, sample_id, kind, design_file, readings_file):
     '''Generate an entire plate.'''
     placement, sample_locs = make_placement(kind)
 
-    design = [*make_head('design'), *generate(params, make_treatment)]
+    design = [*make_head('design', sample_id), *generate(params, make_treatment)]
     save_csv(design_file, normalize_csv(design))
 
-    readings = [*make_head('readings'), *generate(params, make_reading)]
+    readings = [*make_head('readings', sample_id), *generate(params, make_reading)]
     save_csv(readings_file, normalize_csv(readings))
 
 

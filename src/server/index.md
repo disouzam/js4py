@@ -18,16 +18,16 @@ syllabus:
 
 ## Data
 
--   `site_params.csv`: locations of sample sites
--   `survey_params.csv`: dates and sites of field surveys
--   `genome_data.json`: synthetic genomes
--   `sample_data.csv`: genomes found in surveys
-    -   `staff`: lab staff
-    -   `experiments`: which experiments have been done
-    -   `performed`: who did which experiments
-    -   `plates`: which plates were used in which experiments
-    -   `invalidated`: which plates have been invalidated
--   `assay_data.json`: genomic assays
--   `designs/*.csv`: plate designs
--   `readings/*.csv`: plate readings
--   `lab.db`: SQLite database of the above
+-   Parameters
+    -   `params/assay_params.json`:
+    -   `params/genome_params.json`:
+    -   `params/sample_params.json`:
+    -   `params/site_params.csv`: locations of sample sites
+    -   `params/survey_params.csv`: dates and sites of field surveys
+-   Generated Data
+    -   `data/assay_data.json`: genomic assays
+    -   `data/genome_data.json`: synthetic genomes
+    -   `data/sample_data.csv`: genomes found in surveys
+    -   `data/designs/*.csv`: plate designs
+    -   `data/readings/*.csv`: plate readings
+    -   `data/lab.db`: SQLite database of the above

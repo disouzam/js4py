@@ -3,6 +3,7 @@
 import argparse
 from datetime import date, datetime, timedelta
 import json
+import pandas as pd
 from pathlib import Path
 import random
 import string
@@ -27,16 +28,17 @@ class DateTimeEncoder(json.JSONEncoder):
 def main():
     '''Main driver.'''
     options = parse_args()
+    individuals = make_individuals(options)
     random.seed(options.params.seed)
     fake = Faker(options.params.locale)
     result = {
         'staff': make_staff(options.params, fake),
-        **make_experiments(options.params, fake)
+        **make_experiments(options.params, fake, individuals)
     }
     save(options.outfile, result)
 
 
-def make_experiments(params, fake):
+def make_experiments(params, fake, individuals):
     '''Create experiments and their data.'''
     kinds = list(EXPERIMENTS.keys())
     staff_ids = list(range(1, params.staff + 1))
@@ -45,22 +47,23 @@ def make_experiments(params, fake):
     plates = []
 
     random_filename = make_random_filename()
-    for experiment_id in range(1, params.experiments + 1):
+    for i, flag in enumerate(individuals):
+        sample_id = i + 1
         kind = random.choice(kinds)
 
         started, ended = random_experiment_duration(params, kind)
         experiments.append(
-            {'exp_id': experiment_id, 'kind': kind, 'start': round_date(started), 'end': round_date(ended)}
+            {'sample_id': sample_id, 'kind': kind, 'start': round_date(started), 'end': round_date(ended)}
         )
 
         num_staff = random.randint(*EXPERIMENTS[kind]['staff'])
         performed.extend(
-            [{'staff_id': s, 'exp_id': experiment_id} for s in random.sample(staff_ids, num_staff)]
+            [{'staff_id': s, 'sample_id': sample_id} for s in random.sample(staff_ids, num_staff)]
         )
 
         if ended is not None:
             plates.extend(
-                random_plates(params, kind, experiment_id, len(plates), started, random_filename)
+                random_plates(params, kind, sample_id, len(plates), started, random_filename)
             )
 
     invalidated = invalidate_plates(params, plates)
@@ -71,6 +74,15 @@ def make_experiments(params, fake):
         'plate': plates,
         'invalidated': invalidated
     }
+
+
+def make_individuals(options):
+    '''Re-create individual genomic information.'''
+    genomes = json.loads(Path(options.genomes).read_text())
+    samples = pd.read_csv(options.samples)
+    susceptible_loc = genomes['susceptible_loc']
+    susceptible_base = genomes['susceptible_base']
+    return [g[susceptible_loc] == susceptible_base for g in samples['sequence']]
 
 
 def make_staff(params, fake):
@@ -111,8 +123,10 @@ def make_random_filename():
 def parse_args():
     '''Parse command-line arguments.'''
     parser = argparse.ArgumentParser()
+    parser.add_argument('--genomes', type=str, required=True, help='genome file')
     parser.add_argument('--outfile', type=str, default=None, help='output file')
     parser.add_argument('--params', type=str, required=True, help='parameter file')
+    parser.add_argument('--samples', type=str, required=True, help='samples file')
     options = parser.parse_args()
     assert options.params != options.outfile, 'Cannot use same filename for options and parameters'
     options.params = load_params(AssayParams, options.params)
@@ -129,12 +143,12 @@ def random_experiment_duration(params, kind):
     return start, end
 
 
-def random_plates(params, kind, experiment_id, start_id, start_date, random_filename):
+def random_plates(params, kind, sample_id, start_id, start_date, random_filename):
     '''Generate random plate data.'''
     return [
         {
             'plate_id': start_id + i + 1,
-            'exp_id': experiment_id,
+            'sample_id': sample_id,
             'exp_date': random_date_interval(start_date, params.enddate),
             'filename': next(random_filename),
         }

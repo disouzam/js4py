@@ -45,7 +45,7 @@ class Staff(SQLModel, table=True):
 
 class Experiment(SQLModel, table=True):
     '''Experiments.'''
-    exp_id: int = Field(primary_key=True)
+    sample_id: int = Field(primary_key=True)
     kind: str
     start: date_type
     end: date_type | None
@@ -57,7 +57,7 @@ class Experiment(SQLModel, table=True):
 class Performed(SQLModel, table=True):
     '''Who did what experiments?'''
     staff_id: int = Field(foreign_key='staff.staff_id')
-    exp_id: int = Field(foreign_key='experiment.exp_id')
+    sample_id: int = Field(foreign_key='experiment.sample_id')
 
     rowid: int = Field(primary_key=True)
     staff: Staff = Relationship(back_populates='performed')
@@ -67,7 +67,7 @@ class Performed(SQLModel, table=True):
 class Plate(SQLModel, table=True):
     '''What experimental plates do we have?'''
     plate_id: int = Field(primary_key=True)
-    exp_id: int = Field(foreign_key='experiment.exp_id')
+    sample_id: int = Field(foreign_key='experiment.sample_id')
     exp_date: date_type
     filename: str
 

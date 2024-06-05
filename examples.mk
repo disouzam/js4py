@@ -9,7 +9,7 @@ commands:
 	@grep -h -E '^##' ${MAKEFILE_LIST} | sed -e 's/## //g' | column -t -s ':'
 
 ## clean: clean up files
-clean:
+_clean:
 	@rm -rf *~ __pycache__ .coverage .pytest_cache htmlcov
 
 ## settings: show settings
