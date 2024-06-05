@@ -1,102 +1,81 @@
 '''Serve experimental data.'''
 
-from datetime import date as date_type
 from flask import Flask, render_template
-from sqlmodel import Field, Relationship, Session, SQLModel, create_engine, func, select
+from sqlmodel import Session, SQLModel, create_engine, func, select
 import sys
+
+from models import Site, Survey, Sample, Staff, Experiment, Performed, Plate, Invalidated
 
 
 SITE_TITLE = 'Lab Data'
-
-
-dbfile = sys.argv[1]
-engine = create_engine(f'sqlite:///{dbfile}')
-SQLModel.metadata.create_all(engine)
-
-
-class Sites(SQLModel, table=True):
-    '''Survey sites.'''
-    site_id: str = Field(primary_key=True)
-    lon: float
-    lat: float
-    surveys: list['Surveys'] = Relationship(back_populates='site_id')
-
-
-class Surveys(SQLModel, table=True):
-    '''Surveys conducted.'''
-    survey_id: int = Field(primary_key=True)
-    date: date_type
-    site_id: str = Field(foreign_key='sites.site_id')
-    samples: list['Samples'] = Relationship(back_populates='survey_id')
-
-
-class Samples(SQLModel, table=True):
-    '''Individual samples.'''
-    sample_id: int = Field(primary_key=True)
-    lon: float
-    lat: float
-    reading: float
-    survey_id: str = Field(foreign_key='surveys.survey_id')
-
-
-class Staff(SQLModel, table=True):
-    '''Lab staff.'''
-    staff_id: int = Field(primary_key=True)
-    personal: str
-    family: str
-    performed: list['Performed'] = Relationship(back_populates='staff_id')
-    invalidated: list['Invalidated'] = Relationship(back_populates='staff_id')
-
-
-class Experiments(SQLModel, table=True):
-    '''Experiments.'''
-    exp_id: int = Field(primary_key=True)
-    kind: str
-    start: date_type
-    start: date_type | None
-    performed: list['Performed'] = Relationship(back_populates='exp_id')
-    plates: list['Plates'] = Relationship(back_populates='exp_id')
-
-
-class Performed(SQLModel, table=True):
-    '''Who did what experiments?'''
-    rowid: int = Field(primary_key=True)
-    staff_id: int = Field(foreign_key='staff.staff_id')
-    exp_id: int = Field(foreign_key='experiments.exp_id')
-
-
-class Plates(SQLModel, table=True):
-    '''What experimental plates do we have?'''
-    plate_id: int = Field(primary_key=True)
-    exp_id: int = Field(foreign_key='experiments.exp_id')
-    exp_date: date_type
-    filename: str
-    invalidated: list['Invalidated'] = Relationship(back_populates='plate_id')
-
-class Invalidated(SQLModel, table=True):
-    '''Which plates have been invalidated?'''
-    rowid: int = Field(primary_key=True)
-    plate_id: int = Field(foreign_key='plates.plate_id')
-    staff_id: int = Field(foreign_key='staff.staff_id')
-
+ENGINE = None
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
     '''Display data server home page.'''
-    with Session(engine) as session:
+    with Session(ENGINE) as session:
         page_data = {
             'site_title': SITE_TITLE,
-            'num_sites': _db_count(session, Sites),
-            'num_surveys': _db_count(session, Surveys),
-            'num_samples': _db_count(session, Samples),
+            'num_sites': _db_count(session, Site),
+            'num_surveys': _db_count(session, Survey),
+            'num_samples': _db_count(session, Sample),
             'num_staff': _db_count(session, Staff),
+            'num_experiments': _db_count(session, Experiment),
             'num_performed': _db_count(session, Performed),
-            'num_plates': _db_count(session, Plates),
+            'num_plates': _db_count(session, Plate),
             'num_invalidated': _db_count(session, Invalidated),
         }
         return render_template('index.html', **page_data)
+
+
+@app.route('/sites/')
+def sites_index():
+    '''Display site details.'''
+    return _details(Site)
+
+
+@app.route('/surveys/')
+def surveys_index():
+    '''Display site details.'''
+    return _details(Survey)
+
+
+@app.route('/samples/')
+def samples_index():
+    '''Display site details.'''
+    return _details(Sample)
+
+
+@app.route('/staff/')
+def staff_index():
+    '''Display site details.'''
+    return _details(Staff)
+
+
+@app.route('/experiment/')
+def experiment_index():
+    '''Display site details.'''
+    return _details(Experiment)
+
+
+@app.route('/performed/')
+def performed_index():
+    '''Display site details.'''
+    return _details(Performed)
+
+
+@app.route('/plate/')
+def plate_index():
+    '''Display site details.'''
+    return _details(Plate)
+
+
+@app.route('/invalidated/')
+def invalidated_index():
+    '''Display site details.'''
+    return _details(Invalidated)
 
 
 def _db_count(session, table):
@@ -104,5 +83,22 @@ def _db_count(session, table):
     return session.exec(select(func.count()).select_from(table)).one()
 
 
+def _details(table):
+    '''Show details of table.'''
+    with Session(ENGINE) as session:
+        columns = list(table.__fields__.keys())
+        rows = [[getattr(r, c) for c in columns] for r in session.exec(select(table)).all()]
+        page_data = {
+            'site_title': SITE_TITLE,
+            'page_title': table.__name__,
+            'columns': columns,
+            'rows': rows,
+        }
+        return render_template('details.html', **page_data)
+
+
 if __name__ == '__main__':
+    dbfile = sys.argv[1]
+    ENGINE = create_engine(f'sqlite:///{dbfile}')
+    SQLModel.metadata.create_all(ENGINE)
     app.run()

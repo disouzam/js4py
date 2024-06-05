@@ -4,7 +4,6 @@ import argparse
 import json
 import pandas as pd
 import sqlite3
-import sys
 
 
 def main():
@@ -12,15 +11,15 @@ def main():
     options = parse_args()
     con = sqlite3.connect(options.dbfile)
 
-    csv_to_db(con, 'samples', options.samples)
-    csv_to_db(con, 'sites', options.sites)
-    csv_to_db(con, 'surveys', options.surveys, 'survey_id', 'site_id', 'date')
+    csv_to_db(con, 'sample', options.samples)
+    csv_to_db(con, 'site', options.sites)
+    csv_to_db(con, 'survey', options.surveys, 'survey_id', 'site_id', 'date')
 
     assays = json.load(open(options.assays, 'r'))
     json_to_db(con, assays, 'staff')
-    json_to_db(con, assays, 'experiments')
+    json_to_db(con, assays, 'experiment')
     json_to_db(con, assays, 'performed')
-    json_to_db(con, assays, 'plates')
+    json_to_db(con, assays, 'plate')
     json_to_db(con, assays, 'invalidated')
 
 

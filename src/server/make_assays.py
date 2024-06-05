@@ -60,15 +60,15 @@ def make_experiments(params, fake):
 
         if ended is not None:
             plates.extend(
-                random_plates(params, kind, experiment_id, started, random_filename)
+                random_plates(params, kind, experiment_id, len(plates), started, random_filename)
             )
 
     invalidated = invalidate_plates(params, plates)
 
     return {
-        'experiments': experiments,
+        'experiment': experiments,
         'performed': performed,
-        'plates': plates,
+        'plate': plates,
         'invalidated': invalidated
     }
 
@@ -129,11 +129,11 @@ def random_experiment_duration(params, kind):
     return start, end
 
 
-def random_plates(params, kind, experiment_id, start_date, random_filename):
+def random_plates(params, kind, experiment_id, start_id, start_date, random_filename):
     '''Generate random plate data.'''
     return [
         {
-            'plate_id': i + 1,
+            'plate_id': start_id + i + 1,
             'exp_id': experiment_id,
             'exp_date': random_date_interval(start_date, params.enddate),
             'filename': next(random_filename),

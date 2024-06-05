@@ -49,8 +49,8 @@ def generate(params, func):
 def join_assay_data(options):
     '''Get experiment type and plate filename from data.'''
     assays = json.load(open(options.assays, 'r'))
-    experiments = {x['exp_id']: x['kind'] for x in assays['experiments']}
-    plates = {p['filename']: p['exp_id'] for p in assays['plates']}
+    experiments = {x['exp_id']: x['kind'] for x in assays['experiment']}
+    plates = {p['filename']: p['exp_id'] for p in assays['plate']}
     return ((filename, experiments[plates[filename]]) for filename in plates)
 
 
