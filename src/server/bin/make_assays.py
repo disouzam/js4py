@@ -13,8 +13,8 @@ from faker import Faker
 from params import AssayParams, load_params
 
 EXPERIMENTS = {
-    'calibration': {'staff': [1, 1], 'duration': [0, 0], 'plates': [1, 1]},
-    'trial': {'staff': [1, 2], 'duration': [1, 2], 'plates': [2, 16]},
+    'JESS': {'staff': [1, 1], 'duration': [0, 0], 'plates': [1, 1]},
+    'ELISA': {'staff': [1, 2], 'duration': [1, 2], 'plates': [2, 16]},
 }
 FILENAME_LENGTH = 8
 
