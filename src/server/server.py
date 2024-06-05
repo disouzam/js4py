@@ -1,6 +1,6 @@
 '''Serve experimental data.'''
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from sqlmodel import Session, SQLModel, create_engine, func, select
 import sys
 
@@ -9,6 +9,7 @@ from models import Site, Survey, Sample, Staff, Experiment, Performed, Plate, In
 
 SITE_TITLE = 'Lab Data'
 ENGINE = None
+FORMAT = 'fmt'
 
 app = Flask(__name__)
 
@@ -33,49 +34,49 @@ def index():
 @app.route('/sites/')
 def sites_index():
     '''Display site details.'''
-    return _details(Site)
+    return _details(Site, request.args.get(FORMAT))
 
 
 @app.route('/surveys/')
 def surveys_index():
     '''Display site details.'''
-    return _details(Survey)
+    return _details(Survey, request.args.get(FORMAT))
 
 
 @app.route('/samples/')
 def samples_index():
     '''Display site details.'''
-    return _details(Sample)
+    return _details(Sample, request.args.get(FORMAT))
 
 
 @app.route('/staff/')
 def staff_index():
     '''Display site details.'''
-    return _details(Staff)
+    return _details(Staff, request.args.get(FORMAT))
 
 
 @app.route('/experiment/')
 def experiment_index():
     '''Display site details.'''
-    return _details(Experiment)
+    return _details(Experiment, request.args.get(FORMAT))
 
 
 @app.route('/performed/')
 def performed_index():
     '''Display site details.'''
-    return _details(Performed)
+    return _details(Performed, request.args.get(FORMAT))
 
 
 @app.route('/plate/')
 def plate_index():
     '''Display site details.'''
-    return _details(Plate)
+    return _details(Plate, request.args.get(FORMAT))
 
 
 @app.route('/invalidated/')
 def invalidated_index():
     '''Display site details.'''
-    return _details(Invalidated)
+    return _details(Invalidated, request.args.get(FORMAT))
 
 
 def _db_count(session, table):
@@ -83,11 +84,16 @@ def _db_count(session, table):
     return session.exec(select(func.count()).select_from(table)).one()
 
 
-def _details(table):
+def _details(table, fmt):
     '''Show details of table.'''
     with Session(ENGINE) as session:
         columns = list(table.__fields__.keys())
-        rows = [[getattr(r, c) for c in columns] for r in session.exec(select(table)).all()]
+        records = list(session.exec(select(table)).all())
+
+        if fmt and (fmt == 'json'):
+            return [r.model_dump() for r in records]
+
+        rows = [[getattr(r, c) for c in columns] for r in records]
         page_data = {
             'site_title': SITE_TITLE,
             'page_title': table.__name__,

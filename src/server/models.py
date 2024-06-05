@@ -1,6 +1,7 @@
 '''Lab data models.'''
 
 from datetime import date as date_type
+from pydantic import field_serializer
 from sqlmodel import Field, Relationship, SQLModel
 
 class Site(SQLModel, table=True):
@@ -20,6 +21,10 @@ class Survey(SQLModel, table=True):
 
     site: Site = Relationship(back_populates='surveys')
     samples: list['Sample'] = Relationship(back_populates='survey')
+
+    @field_serializer('date')
+    def serialize_date(self, dt, _info):
+        return dt.isoformat() if dt is not None else ''
 
 
 class Sample(SQLModel, table=True):
@@ -53,6 +58,14 @@ class Experiment(SQLModel, table=True):
     performed: list['Performed'] = Relationship(back_populates='experiment')
     plates: list['Plate'] = Relationship(back_populates='experiment')
 
+    @field_serializer('start')
+    def serialize_date(self, dt, _info):
+        return dt.isoformat() if dt is not None else ''
+
+    @field_serializer('end')
+    def serialize_date(self, dt, _info):
+        return dt.isoformat() if dt is not None else ''
+
 
 class Performed(SQLModel, table=True):
     '''Who did what experiments?'''
@@ -68,11 +81,15 @@ class Plate(SQLModel, table=True):
     '''What experimental plates do we have?'''
     plate_id: int = Field(primary_key=True)
     sample_id: int = Field(foreign_key='experiment.sample_id')
-    exp_date: date_type
+    date: date_type
     filename: str
 
     experiment: Experiment = Relationship(back_populates='plates')
     invalidated: list['Invalidated'] = Relationship(back_populates='plate')
+
+    @field_serializer('date')
+    def serialize_date(self, dt, _info):
+        return dt.isoformat() if dt is not None else ''
 
 
 class Invalidated(SQLModel, table=True):
@@ -84,3 +101,7 @@ class Invalidated(SQLModel, table=True):
     rowid: int = Field(primary_key=True)
     plate: Plate = Relationship(back_populates='invalidated')
     staff: Staff = Relationship(back_populates='invalidated')
+
+    @field_serializer('date')
+    def serialize_date(self, dt, _info):
+        return dt.isoformat() if dt is not None else ''

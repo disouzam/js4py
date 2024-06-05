@@ -96,7 +96,7 @@ def make_staff(params, fake):
 def invalidate_plates(params, plates):
     '''Invalidate a random set of plates.'''
     selected = [
-        (i, p['exp_date']) for (i, p) in enumerate(plates) if random.random() < params.invalid
+        (i, p['date']) for (i, p) in enumerate(plates) if random.random() < params.invalid
     ]
     return [
         {
@@ -149,7 +149,7 @@ def random_plates(params, kind, sample_id, start_id, start_date, random_filename
         {
             'plate_id': start_id + i + 1,
             'sample_id': sample_id,
-            'exp_date': random_date_interval(start_date, params.enddate),
+            'date': random_date_interval(start_date, params.enddate),
             'filename': next(random_filename),
         }
         for i in range(random.randint(*EXPERIMENTS[kind]['plates']))
