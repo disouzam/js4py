@@ -1,6 +1,19 @@
 {
     "startdate": "2023-11-01",
     "enddate": "2023-11-10",
+    "experiments": {
+	"JESS": {
+	    "staff": [1, 1],
+	    "duration": [0, 0],
+	    "plates": [1, 1]
+	},
+	"ELISA": {
+	    "staff": [1, 2],
+	    "duration": [1, 2],
+	    "plates": [2, 16]
+	}
+    },
+    "filename_length": 8,
     "locale": "en_IN",
     "invalid": 0.1,
     "staff": 7,

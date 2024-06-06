@@ -19,6 +19,8 @@ class AssayParams:
     seed: int = None
     startdate: date = None
     enddate: date = None
+    experiments: dict
+    filename_length: int = 8
     locale: str = 'en_IN'
     staff: int = 1
     experiments: int = 1

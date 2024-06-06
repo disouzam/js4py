@@ -15,7 +15,7 @@ data/lab.db: bin/make_db.py data/assay_data.json data/sample_data.csv data/genom
 plates: data/designs/.touch data/readings/.touch
 
 data/designs/.touch data/readings/.touch: bin/make_plates.py data/assay_data.json
-	rm -f data/designs data/readings
+	rm -rf data/designs data/readings
 	@mkdir data/designs data/readings
 	python $< \
 	--assays data/assay_data.json \

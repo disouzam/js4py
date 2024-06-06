@@ -12,12 +12,6 @@ from faker import Faker
 
 from params import AssayParams, load_params
 
-EXPERIMENTS = {
-    'JESS': {'staff': [1, 1], 'duration': [0, 0], 'plates': [1, 1]},
-    'ELISA': {'staff': [1, 2], 'duration': [1, 2], 'plates': [2, 16]},
-}
-FILENAME_LENGTH = 8
-
 
 class DateTimeEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -40,13 +34,13 @@ def main():
 
 def make_experiments(params, fake, individuals):
     '''Create experiments and their data.'''
-    kinds = list(EXPERIMENTS.keys())
+    kinds = list(params.experiments.keys())
     staff_ids = list(range(1, params.staff + 1))
     experiments = []
     performed = []
     plates = []
 
-    random_filename = make_random_filename()
+    random_filename = make_random_filename(params)
     for i, flag in enumerate(individuals):
         sample_id = i + 1
         kind = random.choice(kinds)
@@ -56,7 +50,7 @@ def make_experiments(params, fake, individuals):
             {'sample_id': sample_id, 'kind': kind, 'start': round_date(started), 'end': round_date(ended)}
         )
 
-        num_staff = random.randint(*EXPERIMENTS[kind]['staff'])
+        num_staff = random.randint(*params.experiments[kind]['staff'])
         performed.extend(
             [{'staff_id': s, 'sample_id': sample_id} for s in random.sample(staff_ids, num_staff)]
         )
@@ -108,13 +102,13 @@ def invalidate_plates(params, plates):
     ]
 
 
-def make_random_filename():
+def make_random_filename(params):
     '''Create a random filename generator.'''
     filenames = set([''])
     result = ''
     while True:
         while result in filenames:
-            stem = ''.join(random.choices(string.hexdigits, k=FILENAME_LENGTH)).lower()
+            stem = ''.join(random.choices(string.hexdigits, k=params.filename_length)).lower()
             result = f'{stem}.csv'
         filenames.add(result)
         yield result
@@ -137,7 +131,7 @@ def random_experiment_duration(params, kind):
     '''Choose random start date and end date for experiment.'''
     start = random.uniform(params.startdate.timestamp(), params.enddate.timestamp())
     start = datetime.fromtimestamp(start)
-    duration = timedelta(days=random.randint(*EXPERIMENTS[kind]['duration']))
+    duration = timedelta(days=random.randint(*params.experiments[kind]['duration']))
     end = start + duration
     end = None if end > params.enddate else end
     return start, end
@@ -152,7 +146,7 @@ def random_plates(params, kind, sample_id, start_id, start_date, random_filename
             'date': random_date_interval(start_date, params.enddate),
             'filename': next(random_filename),
         }
-        for i in range(random.randint(*EXPERIMENTS[kind]['plates']))
+        for i in range(random.randint(*params.experiments[kind]['plates']))
     ]
 
 
