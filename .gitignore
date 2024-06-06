@@ -16,6 +16,7 @@
 **/docs/*/*.pdf
 **/src/*/*.pdf
 *.bkp
+*.db
 *.dtmp
 *.egg-info
 *~

@@ -50,6 +50,7 @@ DOCS_PDF := $(patsubst ${ROOT}/src/%.pdf,${ROOT}/docs/%.pdf,${SRC_PDF})
 # Keep the PDF versions of diagrams under the 'src' directory between builds
 .PRECIOUS: ${SRC_PDF}
 
+## ----
 ## commands: show available commands
 .PHONY: commands
 commands:
